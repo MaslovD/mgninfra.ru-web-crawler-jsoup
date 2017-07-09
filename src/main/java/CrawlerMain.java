@@ -45,7 +45,7 @@ public class CrawlerMain {
             fw = new FileWriter(file.getAbsoluteFile(), true);
             bw = new BufferedWriter(fw);
 
-            String header = "ID,post_author,post_title,post_excerpt,post_content,post_name,product_type,sku,featured_image,featured_image_name";
+            String header = "ID,post_author,post_title,post_excerpt,post_content,post_name,product_categories,sku,featured_image,featured_image_name\n\r";
             bw.write(header);
             int[] catList = {1, 10, 11, 12, 13, 14, 15, 150, 16, 17,18,19,
                     2,20,21,22,25,27,28,29,
@@ -53,9 +53,8 @@ public class CrawlerMain {
 
             Arrays.sort(catList);
 
-            for (Integer c = 0; c < catList.length; c++) {
+            for (Integer cat : catList) {
 
-                Integer cat = catList[c];
                 urlParams = new Object[]{cat.toString(), "0", "0"};
                 url = MessageFormat.format(urlTemplate, urlParams);
                 doc = Jsoup.connect(url).get();
@@ -79,7 +78,7 @@ public class CrawlerMain {
 
                     Elements prodList = doc.select(".wp-product-list");
                     if (prodList.size() > 3) {
-                        System.out.println("\t"+subCat.toString() + "-" + subCatName);
+                        System.out.println("\t" + cat.toString()+"-"+subCat.toString() + ":" + subCatName);
                     }
 
 
@@ -98,10 +97,10 @@ public class CrawlerMain {
                                 String postExcerpt = "";
                                 String postContent = "";
                                 String postName = "";
-                                String productType = cat.toString() + "-" + subCat.toString();
-                                String sku = "";
-                                String imageURL = "";
-                                String imageName = "";
+                                String productCategories = catName.toString() + ">" + subCatName.toString();
+                                String sku;
+                                String imageURL;
+                                String imageName;
                                 String prodLine = "";
 
 
@@ -110,6 +109,7 @@ public class CrawlerMain {
 
                                 Elements prodITitle = elem.select(".text-product-list .prod-title-list a");
                                 postTitle = prodITitle.html().toString();
+                                String prodSku = elem.select(".wrPrice-list .prod-title-list").text().replace("артикул ","");
 
                                 Elements prodDescription = elem.select(".text-product-list p");
                                 postContent = prodDescription.get(1).html().toString().replace("\"", "'");
@@ -119,12 +119,12 @@ public class CrawlerMain {
 
                                 //String header = "ID,post_author,post_title,post_excerpt,post_content,post_name,product_type,sku,featured_image,featured_image_name";
                                 imageName = "Изображение товара";
-                                sku = prodId.toString();
+                                sku = prodSku+prodId.toString();
 
                                 prodLine = doubleQuotes + prodID + delimiter + postAuthor + delimiter + postTitle + delimiter + postExcerpt
-                                        + delimiter + postContent + delimiter + postName + delimiter + productType + delimiter + sku + delimiter + imageURL + delimiter + imageName + doubleQuotes + "\r\n";
+                                        + delimiter + postContent + delimiter + postName + delimiter + productCategories + delimiter + sku + delimiter + imageURL + delimiter + imageName + doubleQuotes + "\r\n";
 
-                                //bw.write(prodLine);
+                                bw.write(prodLine);
 
                                 //System.out.print(prodLine);
 
